@@ -1,0 +1,42 @@
+@import "node_modules/ol/ol.css";
+
+html, body {
+  margin: 0;
+  height: 100%;
+}
+#map {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 100%;
+}
+
+.ol-control.ol-layerswitcher-image,
+.ol-control.ol-layerswitcher-image.ol-collapsed {
+  left: 0.5em;
+  right: auto !important;
+  bottom: 1em;
+  top: auto !important;
+}
+
+.ol-layerswitcher-image.ol-collapsed button {
+  display: none !important;
+}
+
+.ol-control.ol-geobt {
+  left: 0.5em !important;
+  right: auto !important;
+  top: 4em !important;
+  bottom: auto !important;
+}
+
+.ol-rotate {
+  top: 6em;
+  left: 0.5em;
+  right: auto;
+}
+
+.exportBtn {
+  left: 0.5em;
+  top: 8em;
+}
