@@ -1,5 +1,5 @@
 {
-  "name": "uddviewer",
+  "name": "UDDviewer",
   "version": "1.0.0",
   "scripts": {
     "start": "vite",
@@ -7,11 +7,14 @@
     "serve": "vite preview"
   },
   "devDependencies": {
-    "vite": "^3.0.9"
+    "vite": "^4.0.4"
   },
   "dependencies": {
+    "font-awesome": "^4.7.0",
+    "jquery": "^3.6.3",
     "ol": "latest",
-    "ol-ext": "^4.0.2",
-    "ol-layerswitcher": "^4.1.0"
+    "ol-ext": "^4.0.4",
+    "ol-layerswitcher": "^4.1.0",
+    "proj4": "^2.8.0"
   }
 }
