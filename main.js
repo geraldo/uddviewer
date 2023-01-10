@@ -15,6 +15,7 @@ import {unByKey} from 'ol/Observable';
 
 import proj4 from 'proj4';
 import LayerSwitcher from 'ol-layerswitcher';
+import Popup from 'ol-popup';
 import Button from 'ol-ext/control/Button';
 import Overlay from 'ol-ext/control/Overlay';
 import LayerSwitcherImage from 'ol-ext/control/LayerSwitcherImage';
@@ -26,7 +27,8 @@ const jsonURL = 'geodata/UDDviewer.qgs.json',
       qgisServerURL = 'https://mapa.psig.es/qgisserver/cgi-bin/qgis_mapserv.fcgi',
       mapproxyServerURL = 'https://mapa.psig.es/mapproxy/service?',
       qgisProjectFile = '/home/ubuntu/UDDviewer/UDDviewer.qgs';
-let qgisSources = {};
+let wmsLayers = [],
+    qgisSources = {};
 
 /*
  * LayerSwitcher extended with legends
@@ -336,6 +338,77 @@ map.addControl(new GeolocationButton({
   delay: 2000
 }));
 
+// tooltip
+let tooltip = new Popup({
+  className: "featureTooltip"
+});
+map.addOverlay(tooltip);
+
+map.on('pointermove', function (evt) {
+  if (evt.dragging) {
+    return;
+  }
+  wmsLayers.forEach(function(layerObj) {
+    if (layerObj.getVisible() && layerObj.get("indentifiable") && layerObj.get("type") === "layer") {
+      //console.log(layerObj.get("title"), layerObj.getVisible(), layerObj.get("type"));
+      const data = layerObj.getData(evt.pixel);
+      const hit = data && data[3] > 0; // transparent pixels have zero for data[3]
+      map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+
+      if (hit) {
+        let url = qgisSources[layerObj.get('title')].getFeatureInfoUrl(
+          evt.coordinate, 
+          map.getView().getResolution(), 
+          map.getView().getProjection(),
+          { 'INFO_FORMAT': 'text/xml' }
+        );
+
+        if (url) {
+          url += "&MAP=" + qgisProjectFile;
+          //console.log(layerObj.get('title'), url);
+
+          fetch(url, {
+            mode: 'same-origin', // no-cors, *cors, same-origin
+          })
+          .then((response) => response.text())
+          .then((xml) => {
+
+            let xmlDoc = $.parseXML(xml), 
+                $xml = $(xmlDoc);
+
+            let i = 0;
+            // for each Layer
+            $($xml.find('Layer')).each(function() {
+              let layer = $(this),
+                  layerName = layer.attr('name');
+
+              // for each Feature
+              $(layer.find('Feature')).each(function(){
+
+                if ($(this).children().length > 0) {
+
+                  // for each Attribute
+                  $(this).find("Attribute").each(function(j, elem){
+                    let name = $(elem).attr("name"),
+                        value = $(elem).attr("value");
+
+                    if (name === "name") {
+                      tooltip.show(evt.coordinate, '<div>' + layerObj.get("title") + ": <b>" + value + '</b></div>');
+                    }
+                  });
+                }
+              });
+            });
+          });
+        }
+      }
+      else
+        tooltip.hide();
+    }
+  });
+});
+
+// popup
 let windowFeature = new Overlay({
   closeBox : true,
   className: "slide-right window infoWindow",
@@ -345,15 +418,12 @@ map.addControl(windowFeature);
 
 map.on('click', function(evt) {
   //console.log(evt.coordinate, toLonLat(evt.coordinate));
-
-  selectFeatureInfo(qgisLayers, evt.coordinate);
+  selectFeatureInfo(evt.coordinate);
 });
 
 $(document).keyup(function(e) {
   if (e.keyCode === 27) { // escape
-
-    // hide feature window
-    pageData.windowFeature.hide();
+    windowFeature.hide();
   }
 });
 
@@ -479,17 +549,19 @@ function loadQgisLayer(layer) {
     if (!layer.name.startsWith("@"))
       newLayer.set("title", layer.name);
 
+    wmsLayers.push(newLayer);
+
     return newLayer;
   }
 }
 
-function selectFeatureInfo(layers, coordinates) {
+function selectFeatureInfo(coordinates) {
 
   //console.log(coordinates);
 
   $("#windowFeature .content-layers").empty();
 
-  layers.getLayers().forEach(function(layerObj) {
+  wmsLayers.forEach(function(layerObj) {
 
     //console.log(layerObj);
     //console.log(layerObj.get('title'), layerObj.getVisible());
@@ -578,7 +650,7 @@ function selectFeatureInfo(layers, coordinates) {
       }
     }
     else if (layerObj.getVisible() && layerObj.get("type") === "group") {
-      selectFeatureInfo(layerObj, coordinates);
+      selectFeatureInfo(coordinates);
     }
   });
 
