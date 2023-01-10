@@ -695,7 +695,7 @@ map.addLayer(new VectorLayer({
     }),
     stroke: new Stroke({
       color: 'rgb(255,165,0)',
-      width: 3
+      width: 1
     })
   }),
   hidden: true
