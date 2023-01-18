@@ -392,7 +392,7 @@ map.on('pointermove', function (evt) {
                     let name = $(elem).attr("name"),
                         value = $(elem).attr("value");
 
-                    if (name === "name") {
+                    if (name === "name" || name === "nom") {
                       tooltip.show(evt.coordinate, '<div>' + layerObj.get("title") + ": <b>" + value + '</b></div>');
                     }
                   });
