@@ -24,9 +24,12 @@ import SearchNominatim from 'ol-ext/control/SearchNominatim';
 import $ from 'jquery';
 
 const jsonURL = 'geodata/UDDviewer.qgs.json',
-      qgisServerURL = 'https://mapa.psig.es/qgisserver/cgi-bin/qgis_mapserv.fcgi',
+      /*qgisServerURL = 'https://mapa.psig.es/qgisserver/cgi-bin/qgis_mapserv.fcgi',
       mapproxyServerURL = 'https://mapa.psig.es/mapproxy/service?',
-      qgisProjectFile = '/home/ubuntu/UDDviewer/UDDviewer.qgs';
+      qgisProjectFile = '/home/ubuntu/UDDviewer/UDDviewer.qgs';*/
+      qgisServerURL = 'http://82.223.108.240/qgisserver/cgi-bin/qgis_mapserv.fcgi',
+      mapproxyServerURL = 'http://82.223.108.240/mapproxy/service?',
+      qgisProjectFile = '/home/qgis/UDDviewer/UDDviewer.qgs';
 let wmsLayers = [],
     qgisSources = {};
 
@@ -202,7 +205,7 @@ class LayerSwitcherWithLegend extends LayerSwitcher {
             
             //if (!sublayer.mapproxy) {
               // dynamic from qgis server
-              img.src = qgisServerURL + '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetLegendGraphic&LAYER='+sublayer.name+'&FORMAT=image/png&SLD_VERSION=1.1.0&SYMBOLWIDTH=4&ITEMFONTSIZE=10&BOXSPACE=1&MAP=' + qgisProjectFile;
+              img.src = qgisServerURL + '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetLegendGraphic&TRANSPARENT=true&ITEMFONTCOLOR=white&LAYER='+sublayer.name+'&FORMAT=image/png&SLD_VERSION=1.1.0&SYMBOLWIDTH=4&ITEMFONTSIZE=10&BOXSPACE=1&MAP=' + qgisProjectFile;
 
               // remove image title for all but this layer
               if (lyr.get('title') !== 'Planejament urbanístic')
@@ -227,7 +230,7 @@ class LayerSwitcherWithLegend extends LayerSwitcher {
         } 
         else /*if (!lyr.get('mapproxy') && lyr.get('mapproxy') !== undefined)*/ {
           // dynamic from qgis server
-          img.src = qgisServerURL + '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetLegendGraphic&LAYER='+lyrTitle+'&FORMAT=image/png&SLD_VERSION=1.1.0&LAYERTITLE=false&SYMBOLWIDTH=4&ITEMFONTSIZE=10&BOXSPACE=1&MAP=' + qgisProjectFile;
+          img.src = qgisServerURL + '?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetLegendGraphic&TRANSPARENT=true&ITEMFONTCOLOR=white&LAYER='+lyrTitle+'&FORMAT=image/png&SLD_VERSION=1.1.0&LAYERTITLE=false&SYMBOLWIDTH=4&ITEMFONTSIZE=10&BOXSPACE=1&MAP=' + qgisProjectFile;
         }
         /*else {
           // static from directory
@@ -280,6 +283,14 @@ const map = new Map({
       visible: false
     }),
     new TileLayer({
+      title: 'satellite',
+      baseLayer: true,
+      type: 'base',
+      preload: Infinity,
+      source: bingSource,
+      visible: false
+    }),
+    new TileLayer({
       title: 'blank',
       baseLayer: true,
       type: 'base',
@@ -322,15 +333,6 @@ else {
     }
   })
 }
-
-map.addLayer(new TileLayer({
-  title: 'satellite',
-  baseLayer: true,
-  type: 'base',
-  preload: Infinity,
-  source: bingSource,
-  visible: false
-}));
 
 // geolocation
 map.addControl(new GeolocationButton({

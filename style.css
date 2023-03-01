@@ -1,8 +1,10 @@
 @import "node_modules/ol/ol.css";
+@import 'public/fonts/font.css';
 
 html, body {
   margin: 0;
   height: 100%;
+  font-family: graphic-regular, sans-serif;
 }
 #map {
   position: absolute;
@@ -62,7 +64,8 @@ img.legend {
   top: auto;
 }
 
-.ol-layerswitcher-image button {
+.ol-layerswitcher-image button,
+.ol-layerswitcher-image.ol-collapsed button {
   display: none;
 }
 
