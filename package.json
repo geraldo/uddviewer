@@ -7,15 +7,15 @@
     "serve": "vite preview"
   },
   "devDependencies": {
-    "vite": "^4.0.4"
+    "vite": "^4.1.4"
   },
   "dependencies": {
     "font-awesome": "^4.7.0",
     "jquery": "^3.6.3",
     "ol": "latest",
-    "ol-ext": "^4.0.4",
+    "ol-ext": "^4.0.6",
     "ol-layerswitcher": "^4.1.0",
     "ol-popup": "^5.0.0",
-    "proj4": "^2.8.0"
+    "proj4": "^2.8.1"
   }
 }
