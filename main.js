@@ -5,9 +5,9 @@ import './style.css';
 
 import {Map, View, Collection} from 'ol';
 import {Tile as TileLayer, Vector as VectorLayer, Group as LayerGroup} from 'ol/layer';
-import {Vector, BingMaps, XYZ, OSM, TileWMS} from 'ol/source';
+import {Vector as VectorSource, BingMaps, XYZ, OSM, TileWMS} from 'ol/source';
 import {Style, Fill, Stroke, Circle} from 'ol/style';
-import {GeoJSON} from 'ol/format';
+import {GPX, GML, GeoJSON, IGC, KML, TopoJSON} from 'ol/format';
 import {defaults} from 'ol/control';
 import {get as getProjection, transform, fromLonLat, toLonLat} from 'ol/proj';
 import {register} from 'ol/proj/proj4';
@@ -21,6 +21,7 @@ import Overlay from 'ol-ext/control/Overlay';
 import LayerSwitcherImage from 'ol-ext/control/LayerSwitcherImage';
 import GeolocationButton from 'ol-ext/control/GeolocationButton';
 import SearchNominatim from 'ol-ext/control/SearchNominatim';
+import DropFile from 'ol-ext/interaction/DropFile';
 import $ from 'jquery';
 
 const jsonURL = 'geodata/UDDviewer.qgs.json',
@@ -430,6 +431,126 @@ $(document).keyup(function(e) {
 });
 
 /*
+ * DropFile Interaction
+ *****************************************/
+let dropFileSource = new VectorSource({ wrapX: false });
+let dropFileLayer = new VectorLayer({
+  source: dropFileSource,
+});
+map.addLayer(dropFileLayer);
+
+let dropInteraction = new DropFile({
+  formatConstructors: [
+    GPX,
+    GeoJSON,
+    KML,
+    TopoJSON,
+    GML
+  ],
+  accept: [
+    "gpx",
+    "json",
+    "geojson",
+    "kml",
+    "topojson",
+    "gml"
+  ]
+});
+map.addInteraction(dropInteraction);
+let loading = 0;
+
+// Drag and drop
+dropInteraction.on('loadstart', function (e) {
+  if (!loading) dropFileSource.clear();
+  
+  loading++; 
+  $(".loading").show();
+  $(".loading p").html("LOADING ("+loading+")");
+
+  //console.log('file loadstart', e.filetype.indexOf("application") !== -1, e.filetype.indexOf("zip") !== -1, e);
+
+  // shape file
+  // https://gis.stackexchange.com/a/368103/60146
+  if (e.filetype.indexOf("application") !== -1 && e.filetype.indexOf("zip") !== -1) {
+    console.log("file dropped -> loading SHP file");
+
+    const files = event.dataTransfer.files;
+    for (let i = 0, ii = files.length; i < ii; ++i) {
+      const file = files.item(i);
+      loadshp({url: file, encoding: 'utf-8'}, function(geojson) {
+        const features = new GeoJSON().readFeatures(
+          geojson,
+          { featureProjection: map.getView().getProjection() }
+        );
+        const vectorSource = new VectorSource({
+          features: features
+        });
+        map.addLayer(
+          new VectorLayer({
+            source: vectorSource
+          })
+        );
+        //map.getView().fit(vectorSource.getExtent(), { padding: [100,100,100,100] });
+      });
+    }
+    loading--;
+    $(".loading").hide();
+  }
+});
+
+/*dropInteraction.on('loadend', function (e) {
+  //console.log('file loadend', e);
+  
+  if (e.file.type === "application/gml+xml") {
+    console.log("file dropped -> loading GML file");
+
+    let gmlFormat = new GML32();
+    let features = gmlFormat.readFeatures(e.result, {
+      dataProjection: proj25831,
+      featureProjection: 'EPSG:3857'
+    });
+    
+    const vectorSource = new VectorSource({
+      features: features
+    });
+    map.addLayer(
+      new VectorLayer({
+        source: vectorSource
+      })
+    );
+    map.getView().fit(vectorSource.getExtent(), { padding: [100,100,100,100] });
+
+    loading--;
+    $(".loading").hide();
+  }
+});*/
+
+dropInteraction.on('addfeatures', function(event) {
+  // geojson, KML, etc.
+  console.log("file dropped -> loading Vector features from GeoJSON, KML, etc. file");
+
+  let features = event.features;
+  loading--; 
+
+  $(".loading p").html("LOADING ("+loading+")");
+  $(".loading span").html(features.length);
+
+  setTimeout(function(){
+    dropFileSource.addFeatures(features);
+    
+    if (!loading) $(".loading").hide();
+
+    let vext = map.getView().getProjection().getExtent();
+    let extent = dropFileSource.getExtent();
+    if (extent[0]<vext[0]) extent[0] = vext[0];
+    if (extent[1]<vext[1]) extent[1] = vext[1];
+    if (extent[2]>vext[2]) extent[2] = vext[2];
+    if (extent[3]>vext[3]) extent[3] = vext[3];
+    map.getView().fit(extent, map.getSize(), { padding: [100,100,100,100] });
+  },500);
+});
+
+/*
   Load UDD data
   ****************************************/
 $.getJSON(jsonURL, function() {})
@@ -688,7 +809,7 @@ function fieldIsVisibleInLayer(fieldName, childLayer) {
 /*
   Geocoder
   ****************************************/
-const searchSource = new Vector();
+const searchSource = new VectorSource();
 map.addLayer(new VectorLayer({
   source: searchSource,
   style: new Style({
