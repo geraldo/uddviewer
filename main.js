@@ -22,6 +22,7 @@ import LayerSwitcherImage from 'ol-ext/control/LayerSwitcherImage';
 import GeolocationButton from 'ol-ext/control/GeolocationButton';
 import SearchNominatim from 'ol-ext/control/SearchNominatim';
 import DropFile from 'ol-ext/interaction/DropFile';
+import loadGpkg from 'ol-load-geopackage';
 import $ from 'jquery';
 
 const jsonURL = 'geodata/UDDviewer.qgs.json',
@@ -496,34 +497,65 @@ dropInteraction.on('loadstart', function (e) {
     loading--;
     $(".loading").hide();
   }
+
+  // gpkg
+  else if (e.file.type.indexOf("application") !== -1 && e.file.type.indexOf("geopackage") !== -1) {
+    console.log("file dropped -> loading Geopackage file", e);
+    
+    //let gpkgPromise = loadGpkg(event.dataTransfer.files.item(0), 'EPSG:3857');
+    let gpkgPromise = loadGpkg(e.file, 'EPSG:3857');
+    //let gpkgPromise = loadGpkg("Natural_Earth_QGIS_layers_and_styles.gpkg", e.projection.code_);
+    gpkgPromise
+    .then(([dataFromGpkg, sldsFromGpkg]) => {
+      displayGpkgContents(dataFromGpkg, sldsFromGpkg);
+
+      // Add all vector layers found to map (with default styling)
+      for (var table in dataFromGpkg) {
+        map.addLayer(new VectorLayer({
+          source: dataFromGpkg[table],
+        }));
+      }
+    })
+    .catch(error => alert('ol-load-geopackage error: ' + error));
+  }
 });
 
-/*dropInteraction.on('loadend', function (e) {
-  //console.log('file loadend', e);
-  
-  if (e.file.type === "application/gml+xml") {
-    console.log("file dropped -> loading GML file");
-
-    let gmlFormat = new GML32();
-    let features = gmlFormat.readFeatures(e.result, {
-      dataProjection: proj25831,
-      featureProjection: 'EPSG:3857'
-    });
-    
-    const vectorSource = new VectorSource({
-      features: features
-    });
-    map.addLayer(
-      new VectorLayer({
-        source: vectorSource
-      })
-    );
-    map.getView().fit(vectorSource.getExtent(), { padding: [100,100,100,100] });
-
-    loading--;
-    $(".loading").hide();
+// Display (in browser console) details of all tables in GeoPackage
+function displayGpkgContents(dataFromGpkg, sldsFromGpkg) {
+  // Display SLD strings (if "layer_styles" was found in gpkg)
+  if (Object.keys(sldsFromGpkg).length) {
+    console.log('Raw SLD XML strings for each layer ("layer_styles" table):');
+    console.log(sldsFromGpkg);
+    //for (let layer in sldsFromGpkg) {
+    //    console.log('"' + layer + '": ' + sldsFromGpkg[layer]);
+    //}
   }
-});*/
+}
+
+dropInteraction.on('loadend', function (e) {
+  //console.log('file loadend', e);
+
+  // gpkg
+  /*if (e.file.type.indexOf("application") !== -1 && e.file.type.indexOf("geopackage") !== -1) {
+    //console.log("file dropped -> loading Geopackage file", e);
+
+    //let gpkgPromise = loadGpkg(event.dataTransfer.files.item(0), 'EPSG:3857');
+    let gpkgPromise = loadGpkg(e.file, 'EPSG:3857');
+    //let gpkgPromise = loadGpkg("Natural_Earth_QGIS_layers_and_styles.gpkg", e.projection.code_);
+    gpkgPromise
+    .then(([dataFromGpkg, sldsFromGpkg]) => {
+      displayGpkgContents(dataFromGpkg, sldsFromGpkg);
+
+      // Add all vector layers found to map (with default styling)
+      for (var table in dataFromGpkg) {
+        map.addLayer(new VectorLayer({
+          source: dataFromGpkg[table],
+        }));
+      }
+    })
+    .catch(error => alert('ol-load-geopackage error: ' + error));
+  }*/
+});
 
 dropInteraction.on('addfeatures', function(event) {
   // geojson, KML, etc.
