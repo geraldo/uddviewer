@@ -4,7 +4,7 @@
 html, body {
   margin: 0;
   height: 100%;
-  font-family: graphic-regular, sans-serif;
+  font-family: MatterLight, sans-serif;
 }
 #map {
   position: absolute;
@@ -130,14 +130,14 @@ img.legend {
   margin: 0;
   padding: .3em;
   font-size: 16px;
-  font-family: graphic-semibold, sans-serif;
+  font-family: MatterLight, sans-serif;
   text-transform: uppercase;
   position: relative;
 }
 
 h3 {
   font-size: 16px;
-  font-family: graphic-semibold, sans-serif;
+  font-family: MatterLight, sans-serif;
   border-bottom: 1px solid black;
 }
 
