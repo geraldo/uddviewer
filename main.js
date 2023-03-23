@@ -273,6 +273,7 @@ const map = new Map({
       type: 'base',
       source: new XYZ({
         url: 'https://{1-4}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
+        attributions:'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
       })
     }),
     new TileLayer({
@@ -281,6 +282,7 @@ const map = new Map({
       type: 'base',
       source: new XYZ({
         url: 'https://{1-4}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
+        attributions:'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
       }),
       visible: false
     }),
@@ -897,8 +899,7 @@ fetch(
   Export map as PNG image
   ****************************************/
 map.addControl(new Button ({
-  //html: '<i class="fa fa-smile-o"></i>',
-  html: 'D',
+  html: '<i class="fa fa-camera"></i>',
   className: "exportBtn",
   title: "Export PNG",
   handleClick: function() {
