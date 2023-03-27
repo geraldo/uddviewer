@@ -273,8 +273,9 @@ const map = new Map({
       type: 'base',
       source: new XYZ({
         url: 'https://{1-4}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}.png',
-        attributions:'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
-      })
+        attributions:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        crossOrigin: 'Anonymous'
+      }),
     }),
     new TileLayer({
       title: 'light',
@@ -282,7 +283,8 @@ const map = new Map({
       type: 'base',
       source: new XYZ({
         url: 'https://{1-4}.basemaps.cartocdn.com/light_nolabels/{z}/{x}/{y}.png',
-        attributions:'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        attributions:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
+        crossOrigin: 'Anonymous'
       }),
       visible: false
     }),
@@ -673,7 +675,7 @@ function loadQgisLayer(layer) {
         'MAP': qgisProjectFile
       },
       serverType: 'qgis',
-      crossOrigin: 'Anonymous'
+      //crossOrigin: 'Anonymous'
     });
 
     // save qgisSource to query layer
@@ -686,7 +688,7 @@ function loadQgisLayer(layer) {
         'VERSION': '1.3.0',
       },
       serverType: 'qgis',
-      crossOrigin: 'Anonymous'
+      //crossOrigin: 'Anonymous'
     });
 
     let newLayer = 
@@ -918,8 +920,8 @@ function exportPng() {
       map.getViewport().querySelectorAll('.ol-layer canvas, canvas.ol-layer'),
       function (canvas) {
         if (canvas.width > 0) {
-          const opacity =
-            canvas.parentNode.style.opacity || canvas.style.opacity;
+          canvas.crossOrigin = '*';
+          const opacity = canvas.parentNode.style.opacity || canvas.style.opacity;
           mapContext.globalAlpha = opacity === '' ? 1 : Number(opacity);
           let matrix;
           const transform = canvas.style.transform;
@@ -929,7 +931,8 @@ function exportPng() {
               .match(/^matrix\(([^\(]*)\)$/)[1]
               .split(',')
               .map(Number);
-          } else {
+          } 
+          else {
             matrix = [
               parseFloat(canvas.style.width) / canvas.width,
               0,
@@ -955,8 +958,10 @@ function exportPng() {
     );
     mapContext.globalAlpha = 1;
     mapContext.setTransform(1, 0, 0, 1, 0, 0);
-    const link = document.getElementById('image-download');
+    var link = document.createElement("a");
+    link.download = "map.png";
     link.href = mapCanvas.toDataURL();
+    document.body.appendChild(link);
     link.click();
   });
   map.renderSync();

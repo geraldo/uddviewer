@@ -20,7 +20,7 @@ html, body {
 .layer-switcher .panel {
   border: none;
   border-radius: 0;
-  background-color: #fcb9d4;
+  background-color: white;
   color: black;
 }
 
@@ -61,6 +61,10 @@ img.legend {
 .ol-control button:hover {
   cursor: pointer;
   color: white;
+}
+
+.ol-control i {
+  cursor: pointer;
 }
 
 .ol-control.ol-layerswitcher-image,
