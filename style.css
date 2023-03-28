@@ -52,7 +52,7 @@ img.legend {
   border-radius: 0;
 }
 
-.ol-control button {
+.ol-control > button {
   border-radius: 0;
   background-color: #473ee7;
   color: white;
@@ -65,6 +65,10 @@ img.legend {
 
 .ol-control i {
   cursor: pointer;
+}
+
+input[type="checkbox"] {
+   accent-color: #fcb9d4;
 }
 
 .ol-control.ol-layerswitcher-image,
