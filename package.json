@@ -7,7 +7,7 @@
     "serve": "vite preview"
   },
   "devDependencies": {
-    "vite": "^4.1.4"
+    "vite": "^4.3.9"
   },
   "dependencies": {
     "font-awesome": "^4.7.0",
@@ -17,6 +17,6 @@
     "ol-layerswitcher": "^4.1.1",
     "ol-load-geopackage": "^1.0.3",
     "ol-popup": "^5.0.0",
-    "proj4": "^2.8.1"
+    "proj4": "^2.9.0"
   }
 }
