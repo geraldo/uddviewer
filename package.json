@@ -14,9 +14,9 @@
     "jquery": "^3.7.1",
     "ol": "latest",
     "ol-ext": "^4.0.13",
-    "ol-layerswitcher": "^4.1.1",
+    "ol-layerswitcher": "latest",
     "ol-load-geopackage": "^1.0.3",
     "ol-popup": "^5.1.0",
-    "proj4": "^2.9.2"
+    "proj4": "^2.10.0"
   }
 }
