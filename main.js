@@ -25,13 +25,11 @@ import DropFile from 'ol-ext/interaction/DropFile';
 import loadGpkg from 'ol-load-geopackage';
 import $ from 'jquery';
 
-const jsonURL = 'geodata/UDDviewer.qgs.json',
-      /*qgisServerURL = 'https://mapa.psig.es/qgisserver/cgi-bin/qgis_mapserv.fcgi',
-      mapproxyServerURL = 'https://mapa.psig.es/mapproxy/service?',
-      qgisProjectFile = '/home/ubuntu/UDDviewer/UDDviewer.qgs';*/
+const projectName = 'UDDviewer';
+const jsonURL = 'geodata/' + projectName + '.qgs.json',
       qgisServerURL = 'https://atlas.bithabitat.barcelona/qgisserver/cgi-bin/qgis_mapserv.fcgi',
       mapproxyServerURL = 'https://atlas.bithabitat.barcelona/mapproxy/service?',
-      qgisProjectFile = '/home/qgis/UDDviewer/UDDviewer.qgs';
+      qgisProjectFile = '/home/qgis/' + projectName + '/' + projectName + '.qgs';
 let wmsLayers = [],
     qgisSources = {};
 
@@ -276,6 +274,7 @@ const map = new Map({
         attributions:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
         crossOrigin: 'Anonymous'
       }),
+      visible: false
     }),
     new TileLayer({
       title: 'light',
@@ -286,7 +285,7 @@ const map = new Map({
         attributions:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, &copy; <a href="https://carto.com/attributions">CARTO</a>',
         crossOrigin: 'Anonymous'
       }),
-      visible: false
+      visible: true
     }),
     new TileLayer({
       title: 'satellite',
@@ -313,7 +312,9 @@ const map = new Map({
     center: fromLonLat([2.15, 41.4]),
     //center: transform([2.15, 41.4], 'EPSG:4326', proj25831),
     rotation: Math.PI/4,
-    zoom: 13
+    zoom: 13,
+    minZoom: 12,
+    extent: [210000, 5050000, 270000, 5090000]
   })
 });
 
@@ -672,7 +673,8 @@ function loadQgisLayer(layer) {
         'LAYERS': name,
         'TRANSPARENT': true,
         'VERSION': '1.3.0',
-        'MAP': qgisProjectFile
+        'MAP': qgisProjectFile,
+        'TILED': 'TRUE'
       },
       serverType: 'qgis',
       //crossOrigin: 'Anonymous'
@@ -731,7 +733,7 @@ function selectFeatureInfo(coordinates) {
     if (layerObj.getVisible() && layerObj.get("indentifiable")) {
       // get layer info
 
-      //console.log(layerObj.get('title'), qgisSources[layerObj.get('title')]);
+      console.log(layerObj.get('title'), qgisSources[layerObj.get('title')]);
 
       let url = qgisSources[layerObj.get('title')].getFeatureInfoUrl(
         coordinates, 
